@@ -1,3 +1,33 @@
 ---
+- name: Server instances creation
+  os_server:
+    cloud: openstack
+    name: "{{ item.value.name }}"
+    state: present
+    image: "{{ item.value.image | default('rhel-guest') }}"
+    flavor: "{{ item.value.flavor | default('m1.medium') }}"
+    key_name: "{{ item.value.key_name | default('ansible_ssh') }}"
+    wait: "{{ item.value.wait | default('yes') }}"
+    security_groups: "{{ item.value.security_group }}"
+    delete_fip: "{{ item.value.delete_fip  | default(true) }}"
+    meta: "{{ item.value.meta[0] }}"
+    nics:
+      - net-name: int_network
+      #    - net-name: ext_network
+    userdata: |
+      #!/bin/bash
+      curl -o /tmp/openstack.pub http://www.opentlc.com/download/ansible_bootcamp/openstack_keys/openstack.pub
+      cat /tmp/openstack.pub >> /home/cloud-user/.ssh/authorized_keys
+  with_dict: "{{ osp_servers }}"   
 
+- name: Instances floating ips
+  os_floating_ip:
+    cloud: openstack
+    state: "{{ item.value.state }}"
+    reuse: yes
+    server: "{{ item.value.name }}"
+    network: ext_network
+    wait: true
+    timeout: 200
+  with_dict: "{{ osp_servers }}"
 # tasks file for osp.servers
