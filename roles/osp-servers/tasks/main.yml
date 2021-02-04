@@ -10,7 +10,7 @@
     wait: "{{ item.value.wait | default('yes') }}"
     security_groups: "{{ item.value.security_group }}"
     delete_fip: "{{ item.value.delete_fip  | default(true) }}"
-    meta: "{{ item.value.meta }}"
+    meta: "{{ item.value.meta[0] }}"
     nics:
       - net-name: int_network
       #    - net-name: ext_network
